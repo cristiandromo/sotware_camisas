@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237c9cff'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='sans-serif' font-size='13' font-weight='700' fill='%230d1117'%3EMS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="logo-mark">MS</div>
+      <div>
+        <div class="brand-title">Mockup Studio</div>
+        <div class="brand-sub">DTG / DTF &middot; 300 ppp</div>
+      </div>
+    </div>
+
+    <div class="project-block">
+      <label class="inline-field">
+        <span>Código</span>
+        <input id="project-code" type="text" maxlength="24" placeholder="Ej: TS-001" autocomplete="off">
+      </label>
+      <label class="inline-field grow">
+        <span>Nombre</span>
+        <input id="project-name" type="text" maxlength="80" placeholder="Ej: Camiseta Hello World" autocomplete="off">
+      </label>
+    </div>
+
+    <nav class="tabs" aria-label="Vistas">
+      <button class="tab active" data-target="editor" type="button">Editor</button>
+      <button class="tab" data-target="techpack" type="button">Ficha técnica</button>
+    </nav>
+
+    <div class="topbar-actions">
+      <span id="save-status" class="save-status">Listo</span>
+      <button id="btn-import-project" class="btn ghost" type="button">Importar</button>
+      <button id="btn-export-project" class="btn ghost" type="button">Proyecto</button>
+      <button id="btn-new" class="btn ghost danger-text" type="button">Nuevo</button>
+      <input id="project-file" type="file" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <div id="storage-warn" class="warn" hidden>
+    El navegador no permite guardar datos locales en este contexto. Exporta el proyecto con frecuencia para no perder el avance.
+  </div>
+
+  <main id="view-editor" class="view active">
+    <aside class="panel panel-left">
+      <section class="section">
+        <h2>Camiseta</h2>
+        <div id="side-toggle" class="segmented" role="group" aria-label="Vista de la camiseta">
+          <button type="button" data-side="front" class="active">Frente</button>
+          <button type="button" data-side="back">Espalda</button>
+        </div>
+        <div id="color-swatches" class="swatches" role="group" aria-label="Colores de camiseta"></div>
+        <label class="field-row">
+          <span>Color personalizado</span>
+          <span class="color-control">
+            <input id="shirt-color" type="color" value="#FFFFFF" aria-label="Color de la camiseta">
+            <code id="shirt-color-hex">#FFFFFF</code>
+          </span>
+        </label>
+      </section>
+
+      <section class="section">
+        <h2>Zonas de estampado</h2>
+        <div id="zone-list" class="zone-list"></div>
+        <p class="hint">Cada zona guarda sus propias capas y se exporta como un archivo independiente.</p>
+      </section>
+
+      <section class="section">
+        <h2>Capas</h2>
+        <label id="dropzone" class="dropzone" for="design-input">
+          <strong id="dropzone-title">Arrastra tu diseño</strong>
+          <span>SVG, PNG, JPG o WebP &middot; máx. 12 MB</span>
+          <span class="dropzone-action">Elegir archivo</span>
+          <input id="design-input" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" hidden>
+        </label>
+        <div id="layer-list" class="layer-list"></div>
+        <div class="row-btns four">
+          <button id="btn-layer-up" class="btn" type="button">Subir</button>
+          <button id="btn-layer-down" class="btn" type="button">Bajar</button>
+          <button id="btn-duplicate" class="btn" type="button">Duplicar</button>
+          <button id="btn-lock" class="btn" type="button">Bloquear</button>
+        </div>
+        <p class="hint">Las capas se apilan de abajo hacia arriba. Bloquea una capa para evitar moverla por accidente.</p>
+      </section>
+
+      <section class="section">
+        <h2>Capa seleccionada</h2>
+        <div id="design-meta" class="meta-box">Sin capas en esta zona.</div>
+
+        <div class="field">
+          <label for="width-number">Ancho <output id="width-out">20 cm</output></label>
+          <div class="dual-input">
+            <input id="width-range" type="range" min="2" max="46" step="0.5" value="20">
+            <input id="width-number" type="number" min="2" max="46" step="0.5" value="20">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rot-number">Rotación <output id="rot-out">0°</output></label>
+          <div class="dual-input">
+            <input id="rot-range" type="range" min="-180" max="180" step="1" value="0">
+            <input id="rot-number" type="number" min="-180" max="180" step="1" value="0">
+          </div>
+        </div>
+
+        <div class="row-btns">
+          <button id="btn-flip" class="btn" type="button">Voltear</button>
+          <button id="btn-center" class="btn" type="button">Centrar</button>
+          <button id="btn-remove" class="btn danger" type="button">Quitar</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Guías</h2>
+        <label class="check"><input id="guide-zone" type="checkbox" checked> Límites de la zona activa</label>
+        <label class="check"><input id="guide-safe" type="checkbox" checked> Margen de seguridad de la zona</label>
+        <label class="check"><input id="guide-center" type="checkbox" checked> Ejes centrales</label>
+      </section>
+    </aside>
+
+    <section class="stage-wrap">
+      <div class="stage-toolbar">
+        <div class="stage-info">
+          <span id="stage-side">Frente</span>
+          <span class="dot-sep">&middot;</span>
+          <span id="stage-zone">Pecho central</span>
+          <span class="dot-sep">&middot;</span>
+          <span>1 cm = 10 unidades</span>
+        </div>
+        <div class="toolbar-group">
+          <button id="btn-undo" class="icon-btn" type="button" title="Deshacer (Ctrl+Z)" disabled>Deshacer</button>
+          <button id="btn-redo" class="icon-btn" type="button" title="Rehacer (Ctrl+Shift+Z)" disabled>Rehacer</button>
+          <span class="toolbar-sep"></span>
+          <button id="zoom-out" class="icon-btn" type="button" title="Alejar">-</button>
+          <span id="zoom-label" class="zoom-label">100%</span>
+          <button id="zoom-in" class="icon-btn" type="button" title="Acercar">+</button>
+          <button id="zoom-fit" class="icon-btn" type="button" title="Ajustar">Ajustar</button>
+        </div>
+      </div>
+      <div id="stage-scroll" class="stage-scroll">
+        <div class="stage">
+          <svg id="canvas" viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg" aria-label="Editor de camiseta"></svg>
+        </div>
+      </div>
+      <p class="stage-help">Selecciona una capa en el lienzo o en la lista. Usa el tirador inferior derecho para escalar y el superior para rotar.</p>
+    </section>
+
+    <aside class="panel panel-right">
+      <section class="section">
+        <h2>Archivo de producción</h2>
+        <div id="prod-readout" class="readout">Sin diseño en esta vista.</div>
+        <p class="hint">Archivo de la zona activa: PNG RGB a 300 ppp, fondo transparente y tamaño real en centímetros. Para DTG/DTF.</p>
+        <button id="btn-prod-png" class="btn primary block" type="button" disabled>Descargar PNG 300 ppp</button>
+        <button id="btn-prod-svg" class="btn block" type="button" disabled>Descargar SVG editable</button>
+      </section>
+
+      <section class="section">
+        <h2>Mockup</h2>
+        <label class="field">
+          <span>Fondo</span>
+          <select id="mockup-bg">
+            <option value="light">Claro</option>
+            <option value="transparent">Transparente</option>
+          </select>
+        </label>
+        <button id="btn-mockup-png" class="btn block" type="button" disabled>Mockup PNG</button>
+        <button id="btn-mockup-jpg" class="btn block" type="button" disabled>Mockup JPG</button>
+      </section>
+
+      <section class="section">
+        <h2>Entrega</h2>
+        <ol class="checklist">
+          <li>Mockup para aprobación</li>
+          <li>PNG 300 ppp de producción</li>
+          <li>Ficha técnica en PDF</li>
+        </ol>
+        <button id="btn-open-techpack" class="btn primary block" type="button">Abrir ficha técnica</button>
+      </section>
+
+      <section class="section">
+        <h2>Notas</h2>
+        <p class="hint">El autoguardado vive en este navegador. Exporta el proyecto para respaldarlo o moverlo a otro equipo.</p>
+        <p class="hint">Los logos de terceros pueden tener marcas registradas. Verifica la licencia antes de vender.</p>
+      </section>
+    </aside>
+  </main>
+
+  <main id="view-techpack" class="view">
+    <section class="tp-form">
+      <div class="tp-form-inner">
+        <div class="tp-head">
+          <div>
+            <h1>Ficha técnica</h1>
+            <p class="hint">Datos de producción. El tamaño y la ubicación se calculan desde el editor; puedes sobrescribirlos con una nota.</p>
+          </div>
+          <button id="btn-brand-import" class="btn" type="button">Importar brand.json</button>
+          <input id="brand-input" type="file" accept="application/json,.json" hidden>
+        </div>
+
+        <div class="form-grid">
+          <label class="field"><span>Marca</span><input data-field="brand" type="text" placeholder="Nombre de la marca"></label>
+          <label class="field"><span>Prenda</span><input data-field="garment" type="text"></label>
+          <label class="field"><span>Tejido</span><input data-field="fabric" type="text"></label>
+          <label class="field"><span>Tallas</span><input data-field="sizes" type="text" placeholder="S, M, L, XL"></label>
+          <label class="field"><span>Técnica</span>
+            <select data-field="technique">
+              <option>DTG / DTF</option>
+              <option>DTG</option>
+              <option>DTF</option>
+            </select>
+          </label>
+          <label class="field"><span>Cantidad</span><input data-field="quantity" type="text" inputmode="numeric"></label>
+          <label class="field"><span>Fecha</span><input data-field="date" type="date"></label>
+          <label class="field"><span>Contacto / taller</span><input data-field="contact" type="text"></label>
+          <label class="field full"><span>Ubicación (opcional)</span><input data-field="placement" type="text" placeholder="Se calcula automáticamente si lo dejas vacío"></label>
+          <label class="field full"><span>Identidad de marca (paleta / tipografía)</span><textarea data-field="brandIdentity" rows="2" placeholder="Se importa desde brand.json"></textarea></label>
+          <label class="field full"><span>Notas de producción</span><textarea data-field="notes" rows="4" placeholder="Instrucciones para el taller, tolerancias, acabados..."></textarea></label>
+        </div>
+
+        <div class="tp-actions">
+          <button id="btn-tp-refresh" class="btn" type="button">Actualizar vista</button>
+          <button id="btn-tp-export" class="btn" type="button">Descargar HTML</button>
+          <button id="btn-tp-print" class="btn primary" type="button">Imprimir / PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tp-preview">
+      <div class="preview-head">
+        <span>Vista previa</span>
+        <span id="preview-status" class="preview-status"></span>
+      </div>
+      <iframe id="tp-frame" title="Vista previa de la ficha técnica"></iframe>
+    </section>
+  </main>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/shirt.js"></script>
+  <script src="js/schema.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/techpack.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/selftest.js"></script>
+</body>
+</html>
